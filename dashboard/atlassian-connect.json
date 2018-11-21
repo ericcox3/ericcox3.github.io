@@ -1,0 +1,33 @@
+{
+	"name": "Chime Dashboard Chat",
+	"description": "JIRA Unresolved Issues Chime Chat app",
+	"key": "com.chime.dashboard.issues.chat",
+	"baseUrl": "https://ahnasr.github.io/dashboard",
+	"vendor": {
+		"name": "Amazon, Inc.",
+		"url": "https://www.amazon.com"
+	},
+	"authentication": {
+		"type": "none"
+	},
+	"apiVersion": 1,
+	"scopes": [
+		"read"
+	],
+	"modules": {
+		"jiraDashboardItems": [
+		  {
+			"key": "chime-chat-gadget",
+			"name": {
+			  "value": "Chime Unresolved Issues Chat"
+			},
+			"description": {
+			  "value": "Amazon Chime Unresolved Issues Chat"
+			},
+			"url": "/index.html?dashboardId={dashboard.id}&dashboardItemId={dashboardItem.id}",
+			"configurable": true,
+			"thumbnailUrl": "/chime.png"
+		  }
+		]
+	}
+}

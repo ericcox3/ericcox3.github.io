@@ -1,0 +1,27 @@
+{
+	"name": "codepenTest",
+	"description": "codepen test",
+	"key": "com.codepen.test",
+	"baseUrl": "https://ahnasr.github.io",
+	"vendor": {
+		"name": "Testing, Inc.",
+		"url": "http://test.com"
+	},
+	"authentication": {
+		"type": "none"
+	},
+	"apiVersion": 1,
+	"modules": {
+		"generalPages": [
+			{
+				"url": "/codepencontainer.html",
+				"key": "codepen-test",
+				"location": "system.top.navigation.bar",
+				"name": {
+					"value": "codepen test"
+				}
+			}
+			
+		]
+	}
+}

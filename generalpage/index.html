@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Amazon Chime">
+	<meta http-equiv="Cache-Control" content="no-cache" />
+	<meta http-equiv="Expires" content="-1" />
+    <title>Amazon Chime Web SDK</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="index.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper" class="toggled">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                        Amazon Chime Web SDK1
+                    </a>
+                </li>
+                <li class="unauth-item hidden" onclick="handleLoginTabClick()">
+                    <a href="#">Log in</a>
+                </li>
+                <li class="auth-item hidden" onclick="handleContactTabClick()">
+                    <a href="#">Contact</a>
+                </li>
+                <li id="chat-tab" class="hidden" onclick="handleChatTabClick()">
+                    <a href="#">Chat</a>
+                </li>
+                <li class="auth-item hidden" onclick="handleSignoutTabClick()">
+                    <a href="#">Sign out</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <!-- Login view -->
+                <div id ="login-view" class="hidden view">
+                    <button id="auth-button" type="button" class="btn btn-primary unauth-item">Log in</button>
+                </div>
+                <!-- /#login-view -->
+
+                <!-- Contact view -->
+                <div id="contact-view" class="hidden view">
+                  <div id="contact-error"></div>
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Email address</label>
+                    <input id="add-contact-email" type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
+                  </div>
+                  <button class="btn btn-primary" onclick="handleAddContact()">Add contact</button>
+                </div>
+                <!-- /#contact-view -->
+
+                <!-- Chat view -->
+                <div id="chat-view" class="hidden view">
+                  <div id="chat-name"></div>
+                  <br/>
+                  <div id="message-list">
+                    <ul id="chat-messages" class="list-group"></ul>
+                  </div>
+                  <br/>
+                  <div>
+                    <input id="message-input" class="form-control" placeholder="Type a new message">
+                    <button class="btn btn-primary" onclick="handleSendMessage()">Send</button>
+                  </div>
+                </div>
+                <!-- /#chat-view -->
+
+                <!-- Signout view -->
+                <div id="signout-view" class="view hidden">
+                    <button id="unauth-button" type="button" class="btn btn-primary auth-item">Sign out</button>
+                </div>
+                <!-- /#signout-view -->
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+	    <script id="connect-loader">
+         (function() {
+             var getUrlParam = function (param) {
+                 var codedParam = (new RegExp(param + '=([^&]*)')).exec(window.location.search)[1];
+                 return decodeURIComponent(codedParam);
+             };
+
+             var baseUrl = getUrlParam('xdm_e') + getUrlParam('cp');
+             var options = document.getElementById('connect-loader').getAttribute('data-options');
+
+             var script = document.createElement("script");
+             script.src = baseUrl + '/atlassian-connect/all.js';
+
+             if(options) {
+                 script.setAttribute('data-options', options);
+             }
+
+             document.getElementsByTagName("head")[0].appendChild(script);
+         })();
+    </script>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://g.app.chime.aws/embed/sdk-0.1.2.js"></script>
+    <script src="index.js"></script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,30 @@
+{
+	"name": "Chime Meeting",
+	"description": "JIRA Issues Chime Meeting app",
+	"key": "com.chime.issues.meeting",
+	"baseUrl": "https://ahnasr.github.io/meeting",
+	"vendor": {
+		"name": "Amazon, Inc.",
+		"url": "https://www.amazon.com"
+	},
+	"authentication": {
+		"type": "none"
+	},
+	"apiVersion": 1,
+	"scopes": [
+		"read"
+	],
+	"modules": {
+		"webPanels": [
+        {
+            "key": "chime-issues-meeting",
+            "location": "atl.jira.view.issue.right.context",
+            "weight": 10,
+            "name": {
+                "value": "Issues Chime Meeting"
+            },
+            "url": "/index.html?issue_key={issue.key}&issue_id={issue.id}"
+        }
+    ]
+	}
+}
