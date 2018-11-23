@@ -6,6 +6,7 @@ const authApi = client.auth;
 let conversationId;
 const nameMap = {};
 let currentProfile = {};
+var jiraContacts;
 
 function start() {
     // Always check if the user is authenticated on page load to
@@ -17,6 +18,7 @@ function start() {
                     .then(function(profile) {
                         currentProfile = profile;
                         showAuthPage();
+						getJiraUsers();
                     })
             } else {
                 showUnauthPage()
@@ -53,7 +55,20 @@ function login() {
 function appendMessage(content, senderId) {
     if (!content) return;
     const senderName = nameMap[senderId];
-    $("#chat-messages").append('<li class="list-group-item">' + '<b>' + senderName + '</b>' + ': ' + content + '</li>');
+	const issueButton = document.createElement('button');
+	issueButton.onclick = function() {
+		createIssue(content);
+	}
+	issueButton.innerHTML = 'Create Issue';
+	issueButton.classList.add('btn');
+	issueButton.classList.add('btn-primary');
+	issueButton.classList.add('float-right');
+	const msgItem = document.createElement('li');
+	msgItem.classList.add('list-group-item');
+	msgItem.innerHTML = '<b>' + senderName + '</b>' + ': ' + content;
+	msgItem.appendChild(issueButton);
+    //$("#chat-messages").append('<li class="list-group-item">' + '<b>' + senderName + '</b>' + ': ' + content + '</li>', issueButton);
+	$("#chat-messages").append(msgItem);
 	$("#message-list").scrollTop($("#message-list")[0].scrollHeight);
 }
 
@@ -124,40 +139,40 @@ function handleChatTabClick() {
 // Add contact and create conversation, and save conversation id
 // to global variable conversationId
 function handleAddContact() {
-    const email = $("#add-contact-email").val();
-    contactApi.addContact(email)
-        .then(function(res) {
-            chatApi.createConversation([res.profileId])
-                .then(function(res) {
-                    conversationId = res.id;
-                    const members = res.members;
-                    for (const member of members) {
-                        nameMap[member.id] = member.name;
-                    } 
-                    const chatName = members[0].id === currentProfile.profileId ? members[1].name : members[0].name;
-                    $('#chat-name').empty();
-                    $('#chat-name').append('Chat with: ' + chatName);
-                    renderItem("#chat-tab");
-                })
-                .catch(function(error) {
-                    appendError($('#contact-error'), error);
-                })
-        });
+	var contactSelect = document.getElementById("contact-select");
+	if(contactSelect.selectedIndex != 0) {
+		const email = contactSelect.value;
+		contactApi.addContact(email)
+			.then(function(res) {
+				chatApi.createConversation([res.profileId])
+					.then(function(res) {
+						conversationId = res.id;
+						const members = res.members;
+						for (const member of members) {
+							nameMap[member.id] = member.name;
+						} 
+						const chatName = members[0].id === currentProfile.profileId ? members[1].name : members[0].name;
+						$('#chat-name').empty();
+						$('#chat-name').append('Chat with: ' + chatName);
+						renderItem("#chat-tab");
+					})
+					.catch(function(error) {
+						appendError($('#contact-error'), error);
+					})
+			});
+	}
+	else {
+		alert("Please select a contact first!");
+	}
 }
 
 function handleSendMessage() {
     const message = $("#message-input").val();
     if (message.trim()) {
-		if(message.trim().startsWith('$')) {
-			const issueKey = message.substring(1).trim();
-			sendIssue(issueKey);
-		}
-		else {
-			chatApi.createConversationMessage(conversationId, message.trim())
-				.then(function(res) {
-					$("#message-input").val('');
-				});
-		}
+        chatApi.createConversationMessage(conversationId, message.trim())
+            .then(function(res) {
+                $("#message-input").val('');
+            })
     }
 }
 
@@ -176,31 +191,81 @@ function showUnauthPage() {
     hideItem("#chat-tab");
 }
 
-function sendIssue(issueKey) {
-	var searchJql = 'issueKey = ' + issueKey;
-	console.log(searchJql);
+function getJiraUsers() {
+	var urlParams = new URLSearchParams(window.location.search);
+	var projectKey = urlParams.get("projectKey");
 	AP.require('request', function(request) {
 		request({
-			url: '/rest/api/latest/search?jql=' + encodeURIComponent(searchJql),
+			url: '/rest/api/latest/user/assignable/multiProjectSearch?projectKeys=' + projectKey,
 			success: async function(response) {
 				// convert the string response to JSON
 				response = JSON.parse(response);
 				var responseText = JSON.stringify(response);
 				console.log(responseText);
-				var issue = response.issues[0];
-				var issueMsg = '[' + issue.key + ']' + issue.fields.summary + ': ';
-				issueMsg+= issue.fields.description? issue.fields.description : '';
-				var assignee = issue.fields.assignee? issue.fields.assignee.displayName : 'unassigned';
-				issueMsg+= ' (reporter: ' + issue.fields.reporter.displayName + ', assignee: ' + assignee  + ')'; 
-				chatApi.createConversationMessage(conversationId, issueMsg)
-					.then(function(res) {
-						$("#message-input").val('');
-					});
+				var contactSelect = document.getElementById("contact-select");
+				while(contactSelect.options.length > 1) {
+					contactSelect.remove(contactSelect.options.length - 1);
+				}
+				jiraContacts = new Array();
+				for(var i = 0; i < response.length; i++) {
+					if(response[i].emailAddress != currentProfile.primaryEmail) {
+						var contactOption = document.createElement("option");
+						contactOption.text = response[i].displayName;
+						contactOption.value = response[i].emailAddress;
+						contactSelect.add(contactOption);
+						jiraContacts.push(response[i].name)
+					}
+				}
 			},
 			error: function() {
 				console.log(arguments);
 			}    
 		});
+	});
+}
+
+function createIssue(newIssue) {
+	var issueFields = newIssue.split(':');
+	var urlParams = new URLSearchParams(window.location.search);
+	var projectId = urlParams.get("projectId");
+	var issueData = {
+	  "fields": {
+		"project": { 
+		  "id": projectId
+		},
+		"summary": issueFields[0],
+		"description": (issueFields.length == 1)? "Added using chime chat" : issueFields[1],
+		"issuetype": {
+		  "name": "Task"
+		},
+		"assignee":{
+			"name": jiraContacts[document.getElementById("contact-select").selectedIndex - 1]
+		}
+	  }
+	};
+	AP.require('request', function(request) {
+	  request({
+		url: '/rest/api/latest/issue',
+		// adjust to a POST instead of a GET
+		headers: {
+			"X-Atlassian-Token": "no-check"
+		},
+		type: 'POST',
+		data: JSON.stringify(issueData),
+		contentType: 'multipart/form-data',
+		success: function(response) {
+		  // convert the string response to JSON
+		  response = JSON.parse(response);
+		  alert("Issue was successfully added, key: " + response.key);
+		  // dump out the response to the console
+		  console.log(response);
+		},
+		error: function() {
+		  console.log(arguments);
+		},
+		// inform the server what type of data is in the body of the HTTP POST
+		contentType: "application/json"    
+	  });
 	});
 }
 

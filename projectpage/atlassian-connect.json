@@ -1,0 +1,35 @@
+{
+	"name": "Chime Chat Project Page",
+	"description": "JIRA Project Chime Chat app",
+	"key": "com.chime.page.chat",
+	"baseUrl": "https://ericcox3.github.io/projectpage",
+	"vendor": {
+		"name": "Amazon, Inc.",
+		"url": "https://www.amazon.com"
+	},
+	"authentication": {
+		"type": "none"
+	},
+	"apiVersion": 1,
+	"scopes": [
+		"read", "write"
+	],
+	"modules": {
+		"jiraProjectPages": [
+			{
+				"url": "/index.html?projectId=${project.id}&projectKey=${project.key}",
+				"key": "chime-chat-page",
+				"iconUrl": "/chime.png",
+				"name": {
+					"value": "Chime Chat"
+				},
+				"conditions": [
+					{
+						"condition": "user_is_logged_in"
+					}
+				]
+			}
+			
+		]
+	}
+}

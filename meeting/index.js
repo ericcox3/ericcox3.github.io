@@ -12,7 +12,14 @@ function init() {
 }
 
 function login() {
-	client.auth.authenticate();
+	client.auth.checkIsAuthenticated().then(function(isAuthenticated) {
+		if(!isAuthenticated) {
+			client.auth.authenticate();
+		}
+		else {
+			setLoginStatus(isAuthenticated);
+		}
+	});
 }
 
 function logout() {
@@ -20,17 +27,12 @@ function logout() {
 }
 
 function setLoginStatus(isAuthenticated) {
-	document.getElementById("login-link").style.display = (isAuthenticated)?"none" : "block";
-	document.getElementById("logout-link").style.display = (isAuthenticated)?"block" : "none";
-	document.getElementById("loading-div").style.display = "none";
-	document.getElementById("main-tab").style.display = "block";
-	
 	if(isAuthenticated) {
-		client.auth.getCurrentUserProfile().then(setCurrentUser); 
+		client.auth.getCurrentUserProfile().then(setCurrentUser);
 	}
 	else {
-		//document.getElementById("currentUser").innerHTML = "";
 		document.getElementById("meeting-button").style.display = "none";
+		document.getElementById("login-button").style.display = "block";
 		currentUser = null;
 		contacts = new Array();
 	}
@@ -38,9 +40,9 @@ function setLoginStatus(isAuthenticated) {
 
 function setCurrentUser(profile) {
 	currentUser = profile;
-	//document.getElementById("currentUser").innerHTML = currentUser.name;
 	getIssue();
 	document.getElementById("meeting-button").style.display = "block";
+	document.getElementById("login-button").style.display = "none";
 }
 
 async function addContact(email) {
@@ -50,8 +52,12 @@ async function addContact(email) {
 
 
 function startMeeting() {
-	if(contacts.length > 0)
+	if(contacts.length > 0) {
 		client.meetings.startGroupMeeting(contacts);
+	}
+	else {
+		alert("No one to meet with regarding this issue!");
+	}
 }
 		
 function getIssue() {

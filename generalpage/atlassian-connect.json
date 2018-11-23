@@ -1,8 +1,8 @@
 {
-	"name": "Chime Chat Page",
+	"name": "Chime Chat General Page",
 	"description": "JIRA General Chime Chat app",
-	"key": "com.chime.page.chat",
-	"baseUrl": "https://ahnasr.github.io/generalpage",
+	"key": "com.chime.general.chat",
+	"baseUrl": "https://ericcox3.github.io/generalpage",
 	"vendor": {
 		"name": "Amazon, Inc.",
 		"url": "https://www.amazon.com"
@@ -12,19 +12,23 @@
 	},
 	"apiVersion": 1,
 	"scopes": [
-		"read", "write"
+		"read"
 	],
 	"modules": {
 		"generalPages": [
 			{
 				"url": "/index.html",
-				"key": "chime-chat-page",
+				"key": "chime-general-page",
 				"location": "system.top.navigation.bar",
 				"name": {
 					"value": "Chime Chat"
-				}
+				},
+				"conditions": [
+					{
+						"condition": "user_is_logged_in"
+					}
+				]
 			}
-			
 		]
 	}
 }

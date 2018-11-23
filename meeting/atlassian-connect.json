@@ -2,7 +2,7 @@
 	"name": "Chime Meeting",
 	"description": "JIRA Issues Chime Meeting app",
 	"key": "com.chime.issues.meeting",
-	"baseUrl": "https://ahnasr.github.io/meeting",
+	"baseUrl": "https://ericcox3.github.io/meeting",
 	"vendor": {
 		"name": "Amazon, Inc.",
 		"url": "https://www.amazon.com"
@@ -23,6 +23,11 @@
             "name": {
                 "value": "Issues Chime Meeting"
             },
+			"conditions": [
+				{
+					"condition": "user_is_logged_in"
+				}
+			],
             "url": "/index.html?issue_key={issue.key}&issue_id={issue.id}"
         }
     ]

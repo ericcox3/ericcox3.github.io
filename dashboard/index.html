@@ -4,6 +4,7 @@
 	<meta http-equiv="Cache-Control" content="no-cache" />
 	<meta http-equiv="Expires" content="-1" />
 	<title>Amazon Chime Web SDK</title>
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
      <style>
 	.container {
 		border: 2px solid #dedede;
@@ -13,8 +14,8 @@
 		margin: 10px 0;
 	}
 	.darker {
-    border-color: #ccc;
-    background-color: #ddd;
+    border-color: #86D1D7;
+    background-color: #EEF8F9;
 	}
 	#main-tab {
 		display: none;
@@ -25,44 +26,28 @@
 	</style>
  </head>
  <body>
-	<div id="loading-div" class="show">
-		Loading...
+	<div id="loading-div">
+		<img src="Loading_icon.gif" />
 	</div>
-	<table id="main-tab" class="hide">
-	<tr>
-	<td style="border:1px solid;">
-	<table  style="border-collapse:collapse;">
-		<tr>
-			<td colspan="2" align="right" style="border:1px solid; padding-left:1em; padding-right:1em;">
-				<a id="login-link" href="#msg-text" onclick="login()">Login</a>
-				<div id="currentUser"></div>
-				<a id="logout-link" href="#login-link" onclick="logout()">Logout</a>
-			</td>
-		</tr>
-		<tr>
-			<td style="vertical-align:top; border:1px solid">
-				<div id="sideBar" >
-				</div>
-			</td>
-			<td>
-				<table id="chat-tab">
-					<tr>
-						<td>
-							<div id="chatBox" style="height:110px; width:400px; overflow:auto; padding-left:1em; padding-right:1em; border:1px solid gainsboro"></div>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<input type="text" id="msg-text" class="chime" onkeyup="createConversationMsg(event)" style="width:99%;" />
-						</td>
-					</tr>
-				</table>
-			</td>
-		</tr>
-		</table>
-		</td>
-		</tr>
-	</table>
+	<div id="login-div" style="display:none">
+		<button id="login-button" class="btn btn-primary" onclick="login()"> Click here to login to Amazon Chime </button>
+	</div>
+	<div id="contacts-div" style="display:none">
+		<label for="contacts-select">Select an issue to chat about</label>
+		<select class="form-control" id="contact-select">
+			<option>Select</option>
+      </select>
+	  <br />
+	  <button id="chat-button" class="btn btn-primary" onclick="createConversation()">Start Conversation</div>
+	</div>
+	<div id="chat-div" style="display:none">
+		<a id="logout-link" href="#" onclick="logout()">Logout</a>
+		<div id="message-div" style="max-height:200px;overflow-y:scroll;">
+		</div>
+		<input id="message-text" type="text" onkeyup="createConversationMsg(event)" class="form-control" placeholder="Type a new message then press Enter"></input>
+		<br />
+		<button id="back-button" class="btn btn-primary" onclick="backToContacts()"> << Back to contacts </button>
+	</div>
 	
     <script id="connect-loader">
          (function() {

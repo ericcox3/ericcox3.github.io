@@ -13,7 +13,14 @@ function init() {
 }
 
 function login() {
-	client.auth.authenticate();
+	client.auth.checkIsAuthenticated().then(function(isAuthenticated) {
+		if(!isAuthenticated) {
+			client.auth.authenticate();
+		}
+		else {
+			setLoginStatus(isAuthenticated);
+		}
+	});
 }
 
 function logout() {
@@ -21,18 +28,21 @@ function logout() {
 }
 
 function setLoginStatus(isAuthenticated) {
-	document.getElementById("login-link").style.display = (isAuthenticated)?"none" : "block";
-	document.getElementById("logout-link").style.display = (isAuthenticated)?"block" : "none";
 	document.getElementById("loading-div").style.display = "none";
-	document.getElementById("main-tab").style.display = "block";
+	document.getElementById("login-div").style.display = "none";
+	document.getElementById("contacts-div").style.display = "none";
+	document.getElementById("chat-div").style.display = "none";
 	
 	if(isAuthenticated) {
-		client.auth.getCurrentUserProfile().then(setCurrentUser); 
+		client.auth.getCurrentUserProfile().then(setCurrentUser);
 	}
 	else {
-		document.getElementById("currentUser").innerHTML = "";
-		document.getElementById("sideBar").innerHTML = "";
-		document.getElementById("chatBox").innerHTML = "";
+		document.getElementById("login-div").style.display = "block";
+		document.getElementById("message-div").innerHTML = "";
+		var contactSelect = document.getElementById("contact-select");
+		while(contactSelect.options.length > 1) {
+			contactSelect.remove(contactSelect.options.length - 1);
+		}
 		currentUser = null;
 		currentConversation = null;
 		contacts = {};
@@ -41,44 +51,43 @@ function setLoginStatus(isAuthenticated) {
 
 function setCurrentUser(profile) {
 	currentUser = profile;
-	document.getElementById("currentUser").innerHTML = currentUser.name;
 	getIssue();
 }
 
-async function addContact(email) {
+async function addContact(email, role) {
 	const profile = await client.contact.addContact(email);
 	contacts[profile.profileId] = profile;
-	addToContactsBar(profile);
+	contacts[profile.profileId].role = role;
+	addToContactSelect(profile);
 }
 
-function addToContactsBar(profile) {
-	var contactDiv = document.createElement("div");
-	contactDiv.innerHTML = profile.name;
-	contactDiv.classList.add("contact");
-	contactDiv.onclick = function() {
-		var contactDivs = document.getElementsByClassName("contact");
-		for(var i = 0; i < contactDivs.length; i++)
-			contactDivs.item(i).style.borderStyle = "none";	
-		contactDiv.style.borderStyle = "solid";
-		createConversation(profile.profileId);
+function addToContactSelect(profile) {
+	var contactSelect = document.getElementById("contact-select");
+	var contactOption = document.createElement("option");
+	contactOption.text = profile.name + " (" + profile.role + ")";
+	contactOption.value = profile.profileId;
+	contactSelect.add(contactOption);
+}
+
+function createConversation() {
+	var contactSelect = document.getElementById("contact-select"); 
+	if(contactSelect.selectedIndex != 0) {
+		var profileIds = new Array();
+			profileIds[0] = contactSelect.value;
+			client.chat.createConversation(profileIds).then(function(conversation) {
+				currentConversation = conversation;
+				listConversationMsg();
+				subscribeToConversationMessages();
+				document.getElementById("contacts-div").style.display = "none";
+				document.getElementById("chat-div").style.display = "block";
+			});
 	}
-	
-	var contactsBar = document.getElementById("sideBar");
-	contactsBar.appendChild(contactDiv);
-}
-
-function createConversation(profileId) {
-	var profileIds = new Array();
-	profileIds[0] = profileId;
-	client.chat.createConversation(profileIds).then(function(conversation) {
-		currentConversation = conversation;
-		listConversationMsg();
-		subscribeToConversationMessages();
-	});
+	else {
+		alert("Please select a contact first!");
+	}
 }
 
 function listConversationMsg() {
-	document.getElementById("chatBox").innerHTML = "";
 	client.chat.listConversationMessages(currentConversation.id, { maxResults:5 }).then(function(messages) {
 		for(var i = messages.result.length - 1; i >= 0; i--) {
 			addMsgToChat(messages.result[i]);
@@ -96,30 +105,38 @@ function subscribeToConversationMessages() {
 }
 
 function createConversationMsg(event) {
-	if(event.keyCode == 13) {
-		var msg = document.getElementById("msg-text").value;
+	var msg = document.getElementById("message-text").value;
+	if(event.keyCode == 13 && msg && msg != "") {
 		client.chat.createConversationMessage(currentConversation.id, msg).then(function (result) {
-			document.getElementById("msg-text").value = "";
+			document.getElementById("message-text").value = "";
 		});
 	}
 }
 		
 function addMsgToChat(msg) {
-	var msgDiv = document.createElement("div");
-	var br = document.createElement("br");
-	if(msg.sender == currentUser.profileId) {
-		msgDiv.classList.add("darker");
-		msgDiv.innerHTML = "<strong>" + currentUser.name + ":</strong><br />";
-	}
-	else {
-		msgDiv.innerHTML = "<strong>" + contacts[msg.sender].name + ":</strong><br />";
-	}
-	msgDiv.innerHTML+= msg.content;
-	msgDiv.classList.add("container");
+	if(msg && msg.content) {
+		var msgDiv = document.createElement("div");
+		var br = document.createElement("br");
+		if(msg.sender == currentUser.profileId) {
+			msgDiv.classList.add("darker");
+			msgDiv.innerHTML = "<strong>" + currentUser.name + ": </strong>" + "&nbsp;";
+		}
+		else {
+			msgDiv.innerHTML = "<strong>" + contacts[msg.sender].name + " (" + contacts[msg.sender].role + ")" + ":</strong>" + "&nbsp;";
+		}
+		msgDiv.innerHTML+= msg.content;
+		msgDiv.classList.add("container");
 
-	var chatDiv = document.getElementById("chatBox");
-	chatDiv.appendChild(msgDiv);
-	chatDiv.scrollTop = chatDiv.scrollHeight;
+		var chatDiv = document.getElementById("message-div");
+		chatDiv.appendChild(msgDiv);
+		chatDiv.scrollTop = chatDiv.scrollHeight;
+	}
+}
+
+function backToContacts() {
+	document.getElementById("chat-div").style.display = "none";
+	document.getElementById("contacts-div").style.display = "block";
+	document.getElementById("message-div").innerHTML = "";
 }
 		
 function getIssue() {
@@ -134,12 +151,21 @@ function getIssue() {
 				response = JSON.parse(response);
 				var responseText = JSON.stringify(response);
 				console.log(responseText);
+				var isValidIssue = false;
 				var reporter = response.issues[0].fields.reporter;
-				if(reporter.emailAddress != currentUser.primaryEmail)
-					await addContact(reporter.emailAddress);
+				if(reporter.emailAddress != currentUser.primaryEmail) {
+					await addContact(reporter.emailAddress, "reporter");
+					isValidIssue = true;
+				}
 				var assignee = response.issues[0].fields.assignee;
-				if(assignee && assignee.emailAddress != reporter.emailAddress && assignee.emailAddress != currentUser.primaryEmail)
-					await addContact(assignee.emailAddress);
+				if(assignee && assignee.emailAddress != reporter.emailAddress && assignee.emailAddress != currentUser.primaryEmail) {
+					await addContact(assignee.emailAddress, "assignee");
+					isValidIssue = true;
+				}
+				document.getElementById("contacts-div").style.display = "block";
+				if(!isValidIssue) {
+					alert("No one except you is involved in this issue, so no contact to chat with!")
+				}
 			},
 			error: function() {
 				console.log(arguments);

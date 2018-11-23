@@ -2,7 +2,7 @@
 	"name": "Chime Dashboard Chat",
 	"description": "JIRA Unresolved Issues Chime Chat app",
 	"key": "com.chime.dashboard.issues.chat",
-	"baseUrl": "https://ahnasr.github.io/dashboard",
+	"baseUrl": "https://ericcox3.github.io/dashboard",
 	"vendor": {
 		"name": "Amazon, Inc.",
 		"url": "https://www.amazon.com"
@@ -24,6 +24,11 @@
 			"description": {
 			  "value": "Amazon Chime Unresolved Issues Chat"
 			},
+			"conditions": [
+				{
+					"condition": "user_is_logged_in"
+				}
+			],
 			"url": "/index.html?dashboardId={dashboard.id}&dashboardItemId={dashboardItem.id}",
 			"configurable": true,
 			"thumbnailUrl": "/chime.png"
