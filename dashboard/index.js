@@ -28,15 +28,16 @@ function logout() {
 }
 
 function setLoginStatus(isAuthenticated) {
-	document.getElementById("loading-div").style.display = "none";
 	document.getElementById("login-div").style.display = "none";
 	document.getElementById("contacts-div").style.display = "none";
 	document.getElementById("chat-div").style.display = "none";
+	document.getElementById("loading-div").style.display = "block";
 	
 	if(isAuthenticated) {
 		client.auth.getCurrentUserProfile().then(setCurrentUser);
 	}
 	else {
+		document.getElementById("loading-div").style.display = "none";
 		document.getElementById("login-div").style.display = "block";
 		document.getElementById("message-div").innerHTML = "";
 		var contactSelect = document.getElementById("contact-select");
@@ -122,7 +123,7 @@ function addMsgToChat(msg) {
 		var msgDiv = document.createElement("div");
 		var br = document.createElement("br");
 		if(msg.sender == currentUser.profileId) {
-			msgDiv.classList.add("darker");
+			msgDiv.classList.add("sender");
 			msgDiv.innerHTML = "<strong>" + currentUser.name + ": </strong>" + "&nbsp;";
 		}
 		else {
@@ -160,6 +161,7 @@ function getIssue() {
 					}
 				}
 				document.getElementById("contacts-div").style.display = "block";
+				document.getElementById("loading-div").style.display = "none";
 			},
 			error: function() {
 				console.log(arguments);
