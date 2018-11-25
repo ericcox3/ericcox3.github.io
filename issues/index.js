@@ -28,15 +28,16 @@ function logout() {
 }
 
 function setLoginStatus(isAuthenticated) {
-	document.getElementById("loading-div").style.display = "none";
 	document.getElementById("login-div").style.display = "none";
 	document.getElementById("contacts-div").style.display = "none";
 	document.getElementById("chat-div").style.display = "none";
+	document.getElementById("loading-div").style.display = "block";
 	
 	if(isAuthenticated) {
 		client.auth.getCurrentUserProfile().then(setCurrentUser);
 	}
 	else {
+		document.getElementById("loading-div").style.display = "none";
 		document.getElementById("login-div").style.display = "block";
 		document.getElementById("message-div").innerHTML = "";
 		var contactSelect = document.getElementById("contact-select");
@@ -118,7 +119,7 @@ function addMsgToChat(msg) {
 		var msgDiv = document.createElement("div");
 		var br = document.createElement("br");
 		if(msg.sender == currentUser.profileId) {
-			msgDiv.classList.add("darker");
+			msgDiv.classList.add("sender");
 			msgDiv.innerHTML = "<strong>" + currentUser.name + ": </strong>" + "&nbsp;";
 		}
 		else {
@@ -162,6 +163,7 @@ function getIssue() {
 					await addContact(assignee.emailAddress, "assignee");
 					isValidIssue = true;
 				}
+				document.getElementById("loading-div").style.display = "none";
 				document.getElementById("contacts-div").style.display = "block";
 				if(!isValidIssue) {
 					alert("No one except you is involved in this issue, so no contact to chat with!")
