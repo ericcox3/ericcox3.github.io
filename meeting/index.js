@@ -27,6 +27,7 @@ function logout() {
 }
 
 function setLoginStatus(isAuthenticated) {
+	document.getElementById("nochat-label").style.display = "none";
 	if(isAuthenticated) {
 		client.auth.getCurrentUserProfile().then(setCurrentUser);
 	}
