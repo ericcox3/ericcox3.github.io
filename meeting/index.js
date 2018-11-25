@@ -41,8 +41,6 @@ function setLoginStatus(isAuthenticated) {
 function setCurrentUser(profile) {
 	currentUser = profile;
 	getIssue();
-	document.getElementById("meeting-button").style.display = "block";
-	document.getElementById("login-button").style.display = "none";
 }
 
 async function addContact(email) {
@@ -73,11 +71,14 @@ function getIssue() {
 				var responseText = JSON.stringify(response);
 				console.log(responseText);
 				var reporter = response.issues[0].fields.reporter;
-				if(reporter.emailAddress != currentUser.primaryEmail)
+				if(reporter.emailAddress != currentUser.primaryEmail) {
 					await addContact(reporter.emailAddress);
-				var assignee = response.issues[0].fields.assignee;
-				if(assignee && assignee.emailAddress != reporter.emailAddress && assignee.emailAddress != currentUser.primaryEmail)
-					await addContact(assignee.emailAddress);
+					document.getElementById("meeting-button").style.display = "block";
+				}
+				else {
+					document.getElementById("nochat-label").style.display = "block";
+				}
+				document.getElementById("login-button").style.display = "none";
 			},
 			error: function() {
 				console.log(arguments);
