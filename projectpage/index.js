@@ -17,7 +17,6 @@ function start() {
                 authApi.getCurrentUserProfile()
                     .then(function(profile) {
                         currentProfile = profile;
-                        showAuthPage();
 						getJiraUsers();
                     })
             } else {
@@ -216,6 +215,7 @@ function getJiraUsers() {
 						jiraContacts.push(response[i].name)
 					}
 				}
+				showAuthPage();
 			},
 			error: function() {
 				console.log(arguments);
