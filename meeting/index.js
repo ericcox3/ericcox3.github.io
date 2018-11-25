@@ -31,6 +31,7 @@ function setLoginStatus(isAuthenticated) {
 		client.auth.getCurrentUserProfile().then(setCurrentUser);
 	}
 	else {
+		document.getElementById("loading-label").style.display = "none";
 		document.getElementById("meeting-button").style.display = "none";
 		document.getElementById("login-button").style.display = "block";
 		currentUser = null;
@@ -79,6 +80,7 @@ function getIssue() {
 					document.getElementById("nochat-label").style.display = "block";
 				}
 				document.getElementById("login-button").style.display = "none";
+				document.getElementById("loading-label").style.display = "none";
 			},
 			error: function() {
 				console.log(arguments);
