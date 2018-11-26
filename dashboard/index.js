@@ -2,6 +2,7 @@ const client = new ChimeWebSDK();
 var currentUser;
 var contacts = {};
 var currentConversation;
+var conversationMsgs = new Array();
 
 window.addEventListener('load', function() {
 	setTimeout(init, 500);
@@ -111,15 +112,18 @@ function subscribeToConversationMessages() {
 
 function createConversationMsg(event) {
 	var msg = document.getElementById("message-text").value;
-	if(event.keyCode == 13 && msg && msg != "") {
+	msg = msg.trim();
+	if(event.keyCode == 13 && msg) {
 		client.chat.createConversationMessage(currentConversation.id, msg).then(function (result) {
-			document.getElementById("message-text").value = "";
+			addMsgToChat(result);
 		});
+		document.getElementById("message-text").value = "";
 	}
 }
 		
 function addMsgToChat(msg) {
-	if(msg && msg.content) {
+	if(msg && msg.content && !conversationMsgs.includes(msg.id)) {
+		conversationMsgs.push(msg.id);
 		var msgDiv = document.createElement("div");
 		var br = document.createElement("br");
 		if(msg.sender == currentUser.profileId) {
