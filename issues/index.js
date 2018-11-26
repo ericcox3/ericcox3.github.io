@@ -118,7 +118,7 @@ function createConversationMsg(event) {
 }
 		
 function addMsgToChat(msg) {
-	if(msg && msg.content && !conversationMsgs.include(msg.id)) {
+	if(msg && msg.content && !conversationMsgs.includes(msg.id)) {
 		conversationMsgs.push(msg.id);
 		var msgDiv = document.createElement("div");
 		var br = document.createElement("br");
